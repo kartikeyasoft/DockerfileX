@@ -79,22 +79,6 @@ DockerfileX/
 └── README.md
 ```
 
-### 1. Install Nginx and Node.js 
-```bash
-sudo apt update
-sudo apt install -y nginx curl
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
-```
-
-### 2. Build the React app
-```bash
-cd /path/to/DockerfileX
-npm install
-npm run build
-```
-This creates a `build/` directory with static files.
-
 
 ## 🐳 Running with Docker (recommended)
 
