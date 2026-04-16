@@ -213,30 +213,38 @@ If you are strongly considering `nginx:alpine`, you should understand how to har
 This practical example combines the best practices we've discussed. It uses a **multi-stage build** to keep the image small and uses the secure `nginxinc/nginx-unprivileged` image for the final stage.
 
 ```dockerfile
-# ---- Build Stage ----
-FROM node:21-alpine AS builder
+# ---- Stage 1: Dependencies ----
+FROM node:18-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
+
+# ---- Stage 2: Builder ----
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# ---- Production Stage ----
-FROM nginxinc/nginx-unprivileged:1.25-alpine
-COPY --from=builder /app/build /usr/share/nginx/html
+# ---- Stage 3: Static busybox (uclibc – fully static) ----
+FROM busybox:uclibc AS busybox
 
-# Create a minimal nginx configuration
-RUN echo 'server { \
-    listen 8080; \
-    server_name localhost; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# ---- Stage 4: Final distroless image ----
+FROM gcr.io/distroless/static:latest
 
-EXPOSE 8080
+# Copy the fully static busybox binary
+COPY --from=busybox /bin/busybox /bin/busybox
+
+# Copy built React app
+COPY --from=builder /app/build /www
+
+WORKDIR /www
+EXPOSE 80
+
+# Start busybox httpd (foreground, port 80, serving /www)
+# Note: This simple server does NOT support SPA fallback (try_files).
+# You MUST use HashRouter in your React app (URLs like /#/about).
+ENTRYPOINT ["/bin/busybox", "httpd", "-f", "-p", "80", "-h", "/www"]
 ```
 
 This setup provides a solid, secure, and lightweight foundation for your React app.
