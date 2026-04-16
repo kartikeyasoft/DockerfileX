@@ -39,32 +39,6 @@ Built with React, styled‑components, and nginx for static serving.
 
 ---
 
-## 🛠️ Running Locally (without Docker)
-
-### Prerequisites
-- Node.js 18+ and npm
-
-### Steps
-```bash
-# Clone or download the project
-cd DockerfileX
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm start
-
-The app will open at `http://localhost:3000`.
-
-### Build for production
-```bash
-npm run build
-```
-The static files will be in the `build/` folder – you can serve them with any static server (e.g., `serve -s build`).
-
----
-
 ## 📁 Project Structure (relevant files)
 
 ```
