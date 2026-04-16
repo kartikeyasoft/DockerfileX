@@ -1,4 +1,3 @@
-```markdown
 # 📜 Productivity Spellbook
 
 A beautiful, dark‑themed task management app that stores everything **locally in your browser** – no backend, no API keys, no database required.  
@@ -55,7 +54,7 @@ npm install
 
 # Start the development server
 npm start
-```
+
 The app will open at `http://localhost:3000`.
 
 ### Build for production
