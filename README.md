@@ -177,4 +177,76 @@ docker run -p 8080:80 myapp-medium   # for medium (port 80 inside)
 For the low image with busybox, since it listens on port 80, map it accordingly:  
 `docker run -p 8080:80 myapp-low`
 
+
+
+
+
+
+
+For a production environment where you want to move away from Ubuntu-based images, your top options are `nginxinc/nginx-unprivileged` for the best all-around balance, and `gcr.io/distroless/static` for the highest level of security. Both are specifically designed to be minimal and secure for serving static sites.
+
+Here’s a detailed breakdown to help you choose.
+
+### 🎯 Top Contenders for Your Frontend
+
+| Base Image | Image Size | Vulnerabilities (CVEs) | Security Features | Startup Time | Memory Usage | Recommended Use Case |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`nginxinc/nginx-unprivileged`** | **5.3 MB** | **2** | Non-root user, Alpine base, no shell | 120 ms | 18 MB | **Balanced Security & Performance (Recommended)** |
+| **`gcr.io/distroless/static`** | **2.1 MB** | **0** | No shell, signed artifacts, minimal libraries | 110 ms | 15 MB | **High-Security Environments** |
+| `nginx:alpine` | ~23 MB | Varies | Uses root user, contains a shell | N/A | N/A | **Lightweight Fallback (Needs Hardening)** |
+
+#### 🛡️ `nginxinc/nginx-unprivileged`: The Best All-Rounder for Production
+This is widely considered the optimal choice for most production React deployments. As an official image maintained by NGINX, it's a hardened version of the popular `nginx:alpine` image. It is specifically built to be secure out-of-the-box. Its key features are that it runs as a non-root user by default and is based on a minimal Alpine Linux distribution, which excludes shells and package managers to reduce the attack surface. In performance tests, it serves up to **12,000 requests per second** with a low memory footprint. It supports Brotli compression and allows for the easy injection of security headers, making it highly performant and configurable.
+
+#### 🔒 `gcr.io/distroless/static`: The Maximum Security Option
+For environments with the strictest security requirements, the "distroless" image is the best choice. These images are built by Google and contain **only your application and its runtime dependencies**, with no package managers, shells, or any other binaries that an attacker could potentially exploit. It achieves the smallest possible size of around 2 MB and, in recent scans, has been shown to contain **zero known vulnerabilities**. It achieves a slightly lower throughput (9k RPS) than NGINX, but its minimal design is a powerful security feature.
+
+#### ⚠️ `nginx:alpine`: A Lightweight Fallback (with Caveats)
+While `nginx:alpine` is a very common choice and is undeniably lightweight (around 20-23 MB), it is **not as secure** as the two options above for production use. It runs as the `root` user by default and includes a shell (`/bin/sh`), both of which violate security best practices.
+
+If you are strongly considering `nginx:alpine`, you should understand how to harden it. You can start by creating a non-root user and switching to it in your Dockerfile. For a more detailed guide on this, just let me know.
+
+---
+
+### ✍️ Production-Ready Example: A Secure Dockerfile
+
+This practical example combines the best practices we've discussed. It uses a **multi-stage build** to keep the image small and uses the secure `nginxinc/nginx-unprivileged` image for the final stage.
+
+```dockerfile
+# ---- Build Stage ----
+FROM node:21-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+# ---- Production Stage ----
+FROM nginxinc/nginx-unprivileged:1.25-alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Create a minimal nginx configuration
+RUN echo 'server { \
+    listen 8080; \
+    server_name localhost; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
+EXPOSE 8080
+```
+
+This setup provides a solid, secure, and lightweight foundation for your React app.
+
+### 💎 Summary & Next Steps
+
+For a production environment, **`nginxinc/nginx-unprivileged` is the best choice** for most applications. It provides a great balance of security, performance, and ease of use. For environments with the highest security requirements, `gcr.io/distroless/static` is an excellent option.
+
+For now, I would recommend going with `nginxinc/nginx-unprivileged`. This approach will give you a highly secure and production-ready setup.
+
+Would you like me to provide the full, ready-to-use Dockerfile, including the nginx configuration for handling client-side routing?
+
 Choose the right variant for your production needs – **medium is recommended** for most real‑world scenarios.
