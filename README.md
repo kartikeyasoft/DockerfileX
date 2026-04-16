@@ -47,7 +47,7 @@ Built with React, styled‑components, and nginx for static serving.
 ### Steps
 ```bash
 # Clone or download the project
-cd frontend
+cd DockerfileX
 
 # Install dependencies
 npm install
