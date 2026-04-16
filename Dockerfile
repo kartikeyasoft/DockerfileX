@@ -1,24 +1,10 @@
-# Stage 1: Build the React application
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy source code and build
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve static files with Nginx (no backend proxy)
 FROM nginx:alpine
 
-# Copy built assets from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+# Copy the pre‑built static files from your local build folder
+# Make sure you run `npm run build` locally before building the Docker image
+COPY ./build /usr/share/nginx/html
 
-# Create a minimal Nginx configuration for static SPA hosting
-# No reverse proxy to backend – all routing handled client‑side
+# Write the nginx configuration (SPA routing, no backend proxy)
 RUN echo 'server { \
     listen 80; \
     server_name localhost; \
@@ -31,5 +17,5 @@ RUN echo 'server { \
 
 EXPOSE 80
 
-# Start Nginx (keeps container alive)
+# Start nginx (keeps container alive)
 CMD ["nginx", "-g", "daemon off;"]
