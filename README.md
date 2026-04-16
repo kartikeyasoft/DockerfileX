@@ -97,10 +97,5 @@ docker run -d -p 8080:80 --name spellbook productivity-spellbook
 ### Access the app
 Open your browser and go to `http://localhost:8080`
 
-### Stop and remove
-```bash
-docker stop spellbook && docker rm spellbook
-```
-
 
 
