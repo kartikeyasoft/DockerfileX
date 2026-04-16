@@ -65,6 +65,20 @@ The static files will be in the `build/` folder – you can serve them with any 
 
 ---
 
+## 📁 Project Structure (relevant files)
+
+```
+frontend/
+├── src/
+│   ├── App.js          # Main React component (the spellbook)
+│   └── index.js        # Entry point
+├── public/
+│   └── index.html
+├── Dockerfile          # Multi‑stage build (Node → nginx)
+├── package.json
+└── README.md
+```
+
 ## 🐳 Running with Docker (recommended)
 
 The project includes a **two‑stage Dockerfile** that builds the React app and serves it with nginx.  
@@ -88,63 +102,5 @@ Open your browser and go to `http://localhost:8080`
 docker stop spellbook && docker rm spellbook
 ```
 
----
 
-## 📁 Project Structure (relevant files)
-
-```
-frontend/
-├── src/
-│   ├── App.js          # Main React component (the spellbook)
-│   └── index.js        # Entry point
-├── public/
-│   └── index.html
-├── Dockerfile          # Multi‑stage build (Node → nginx)
-├── package.json
-└── README.md
-```
-
----
-
-## 🧠 Why no backend?
-
-The original version of this app used `axios` to call a backend API (Node.js/Express).  
-But we removed all backend dependencies because:
-
-- The user wanted a **self‑contained container** that starts without any external service.
-- All features (adding, toggling, deleting, filtering) can be done **entirely in the browser** using `localStorage`.
-- This makes the app **ultra‑portable** – you can host it on any static hosting service (GitHub Pages, Netlify, Vercel, S3, etc.) and it will work forever without a server.
-
----
-
-## 🧪 Data persistence note
-
-Your spells are stored in your browser’s `localStorage` under the key `productivity_spells`.  
-If you clear your browser’s site data, the spells will be lost.  
-To back them up, you can open DevTools → Application → Local Storage and copy the JSON.
-
----
-
-## 🎨 Customisation
-
-- **Change the theme colours**: edit the gradient in `Container` and the neon colours in `MagicButton`, `Title`, etc.
-- **Add more priorities**: modify the `Select` options and the colour mapping in `PriorityBadge`.
-- **Add categories or tags**: extend the `spell` object and update the UI accordingly.
-
----
-
-## 📄 License
-
-MIT © [KartikeyaSoft](https://github.com/kartikeyasoft)
-
----
-
-## 🙏 Credits
-
-Designed and developed with 🖤 by **KartikeyaSoft** – making productivity magical.
-
-```
-
-You can save this as `README.md` in your project root. It covers everything from features to Docker usage, and clearly explains why there’s no backend – exactly what your user needs.
-The static files will be in the `build/` folder – you can serve them with any static server (e.g., `serve -s build`).
 
